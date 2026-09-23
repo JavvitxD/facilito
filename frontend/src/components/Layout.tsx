@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { LayoutDashboard, Package, Stethoscope, BarChart3, LogOut, ChevronLeft, Menu, X, Layers, History, Wallet, ShieldCheck } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import CambiarPasswordModal from './CambiarPasswordModal'
+import BotonRestaurarDemo from './BotonRestaurarDemo'
 
 export default function Layout() {
   const { user, logout } = useAuth()
@@ -76,6 +77,7 @@ export default function Layout() {
           <ShieldCheck size={18} />
           Cambiar contraseña
         </button>
+        <BotonRestaurarDemo />
         <button
           onClick={() => { logout(); navigate('/login') }}
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 w-full"
