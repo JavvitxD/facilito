@@ -1,7 +1,8 @@
 import { Outlet, NavLink, useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { LayoutDashboard, Package, Stethoscope, BarChart3, LogOut, ChevronLeft, Menu, X, Layers, History, Wallet } from 'lucide-react'
+import { LayoutDashboard, Package, Stethoscope, BarChart3, LogOut, ChevronLeft, Menu, X, Layers, History, Wallet, ShieldCheck } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import CambiarPasswordModal from './CambiarPasswordModal'
 
 export default function Layout() {
   const { user, logout } = useAuth()
@@ -9,6 +10,7 @@ export default function Layout() {
   const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [espacioNombre, setEspacioNombre] = useState('')
+  const [cambiandoPassword, setCambiandoPassword] = useState(false)
 
   useEffect(() => {
     const stored = localStorage.getItem('espacio')
@@ -55,12 +57,24 @@ export default function Layout() {
         ))}
       </nav>
       <div className="p-3 border-t border-gray-200 space-y-1">
+        {user?.email && (
+          <div className="px-3 pb-1 text-xs text-gray-400 truncate" title={user.email}>
+            {user.email}
+          </div>
+        )}
         <button
           onClick={() => { navigate('/seleccionar-espacio'); setSidebarOpen(false) }}
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 w-full"
         >
           <ChevronLeft size={18} />
           Cambiar espacio
+        </button>
+        <button
+          onClick={() => { setCambiandoPassword(true); setSidebarOpen(false) }}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 w-full"
+        >
+          <ShieldCheck size={18} />
+          Cambiar contraseña
         </button>
         <button
           onClick={() => { logout(); navigate('/login') }}
@@ -106,6 +120,10 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+
+      {cambiandoPassword && (
+        <CambiarPasswordModal onClose={() => setCambiandoPassword(false)} />
+      )}
     </div>
   )
 }

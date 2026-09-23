@@ -8,6 +8,11 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class CambiarPasswordRequest(BaseModel):
+    password_actual: str
+    password_nueva: str
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
