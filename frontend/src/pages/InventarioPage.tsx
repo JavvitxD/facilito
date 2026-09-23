@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
-import { Plus, Search, AlertTriangle, ChevronDown, ChevronUp, Pencil, Trash2, X, Check, Settings } from 'lucide-react'
+import ImportarExcelModal from '../components/ImportarExcelModal'
+import { Plus, Search, AlertTriangle, ChevronDown, ChevronUp, Pencil, Trash2, X, Check, Settings, Upload, Download } from 'lucide-react'
 
 function cop(n: number) {
   return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n)
@@ -509,6 +510,19 @@ export default function InventarioPage() {
   const [catFilter, setCatFilter] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [showProveedores, setShowProveedores] = useState(false)
+  const [showImportar, setShowImportar] = useState(false)
+
+  async function descargarExcel() {
+    const { data } = await api.get(`/espacios/${espacioId}/inventario/exportar`, {
+      responseType: 'blob',
+    })
+    const url = URL.createObjectURL(data)
+    const enlace = document.createElement('a')
+    enlace.href = url
+    enlace.download = `inventario_${new Date().toISOString().slice(0, 10)}.xlsx`
+    enlace.click()
+    URL.revokeObjectURL(url)
+  }
   const [soloAlertas, setSoloAlertas] = useState(false)
 
   const { data: insumos = [], isLoading } = useQuery({
@@ -545,6 +559,22 @@ export default function InventarioPage() {
           >
             <Settings size={15} />
             <span className="hidden sm:inline">Proveedores</span>
+          </button>
+          <button
+            className="btn-secondary flex items-center gap-2 text-sm"
+            onClick={descargarExcel}
+            title="Descargar el inventario en Excel"
+          >
+            <Download size={15} />
+            <span className="hidden sm:inline">Exportar</span>
+          </button>
+          <button
+            className="btn-secondary flex items-center gap-2 text-sm"
+            onClick={() => setShowImportar(true)}
+            title="Subir un Excel con el inventario"
+          >
+            <Upload size={15} />
+            <span className="hidden sm:inline">Importar</span>
           </button>
           <button className="btn-primary flex items-center gap-2" onClick={() => setShowModal(true)}>
             <Plus size={16} />
@@ -611,6 +641,10 @@ export default function InventarioPage() {
       {showModal && (
         <NuevoInsumoModal espacioId={espacioId!} proveedores={proveedores} onClose={() => setShowModal(false)} />
       )}
+      {showImportar && (
+        <ImportarExcelModal espacioId={espacioId!} onClose={() => setShowImportar(false)} />
+      )}
+
       {showProveedores && (
         <ProveedoresModal espacioId={espacioId!} proveedores={proveedores} onClose={() => setShowProveedores(false)} />
       )}
