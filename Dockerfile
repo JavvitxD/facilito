@@ -30,4 +30,4 @@ ENV PORT=8000
 EXPOSE 8000
 
 # Aplica migraciones y siembra datos (ambos seeds son idempotentes) antes de arrancar.
-CMD sh -c "alembic upgrade head && python seed.py && python seed_mf.py && uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"
+CMD sh -c "alembic upgrade head && python seed.py && python seed_mf.py && python seed_demo.py && uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"
