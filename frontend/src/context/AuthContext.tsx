@@ -6,6 +6,7 @@ interface User {
   email: string
   rol: string
   empresa_id?: string
+  debe_cambiar_password?: boolean
 }
 
 interface AuthContextType {

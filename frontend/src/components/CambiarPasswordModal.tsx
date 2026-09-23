@@ -4,7 +4,9 @@ import { X, Eye, EyeOff, Check, ShieldCheck } from 'lucide-react'
 
 const MIN_PASSWORD = 8
 
-export default function CambiarPasswordModal({ onClose }: { onClose: () => void }) {
+export default function CambiarPasswordModal(
+  { onClose, forzado = false }: { onClose: () => void; forzado?: boolean },
+) {
   const [actual, setActual] = useState('')
   const [nueva, setNueva] = useState('')
   const [confirmacion, setConfirmacion] = useState('')
@@ -28,8 +30,16 @@ export default function CambiarPasswordModal({ onClose }: { onClose: () => void 
       })
       // El backend devuelve un token nuevo para no perder la sesion.
       localStorage.setItem('token', data.access_token)
+      // El usuario guardado trae la marca de contraseña temporal; hay que
+      // refrescarlo o la aplicación seguiría exigiendo el cambio.
+      try {
+        const { data: yo } = await api.get('/auth/me')
+        localStorage.setItem('user', JSON.stringify(yo))
+      } catch {
+        // Si falla, recargar igual deja el estado consistente.
+      }
       setListo(true)
-      setTimeout(onClose, 1800)
+      setTimeout(() => { forzado ? window.location.reload() : onClose() }, 1500)
     } catch (err: any) {
       const detalle = err?.response?.data?.detail
       setError(typeof detalle === 'string' ? detalle : 'No se pudo cambiar la contraseña.')
@@ -62,15 +72,23 @@ export default function CambiarPasswordModal({ onClose }: { onClose: () => void 
             <ShieldCheck size={18} className="text-brand-600" />
             <h2 className="font-semibold text-gray-900">Cambiar contraseña</h2>
           </div>
-          <button type="button" onClick={onClose}>
-            <X size={20} className="text-gray-400" />
-          </button>
+          {!forzado && (
+            <button type="button" onClick={onClose}>
+              <X size={20} className="text-gray-400" />
+            </button>
+          )}
         </div>
 
         <div className="p-5 space-y-4">
+          {forzado && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3 text-sm text-yellow-800">
+              Tu contraseña fue asignada por un administrador. Elige una propia
+              para continuar.
+            </div>
+          )}
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">
-              Contraseña actual *
+              {forzado ? 'Contraseña temporal *' : 'Contraseña actual *'}
             </label>
             <input
               type={verClaves ? 'text' : 'password'}
@@ -139,9 +157,11 @@ export default function CambiarPasswordModal({ onClose }: { onClose: () => void 
           <button type="submit" className="btn-primary flex-1" disabled={!puedeEnviar || guardando}>
             {guardando ? 'Guardando...' : 'Cambiar contraseña'}
           </button>
-          <button type="button" className="btn-secondary" onClick={onClose}>
-            Cancelar
-          </button>
+          {!forzado && (
+            <button type="button" className="btn-secondary" onClick={onClose}>
+              Cancelar
+            </button>
+          )}
         </div>
       </form>
     </div>

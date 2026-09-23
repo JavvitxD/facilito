@@ -50,6 +50,8 @@ def cambiar_password(
         raise HTTPException(status_code=422, detail="La contraseña nueva debe ser distinta de la actual")
 
     current_user.password_hash = hash_password(nueva)
+    # Ya eligio una propia: deja de ser temporal.
+    current_user.debe_cambiar_password = False
     db.commit()
 
     token = create_access_token({"sub": str(current_user.id)})

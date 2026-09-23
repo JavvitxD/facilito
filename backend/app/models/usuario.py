@@ -14,5 +14,8 @@ class Usuario(Base):
     rol = Column(String, nullable=False)  # 'superadmin' | 'empresa'
     empresa_id = Column(UUID(as_uuid=True), ForeignKey("empresas.id"), nullable=True)
     activo = Column(Boolean, default=True)
+    # True cuando la contrasena fue asignada por un administrador: la aplicacion
+    # exige elegir una propia antes de dejar usar nada.
+    debe_cambiar_password = Column(Boolean, nullable=False, default=False)
 
     empresa = relationship("Empresa", back_populates="usuarios")

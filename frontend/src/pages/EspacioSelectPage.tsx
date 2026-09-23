@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../api/client'
-import { UserCircle, LogOut } from 'lucide-react'
+import { UserCircle, LogOut, Users } from 'lucide-react'
 
 export default function EspacioSelectPage() {
   const { user, logout } = useAuth()
@@ -63,10 +63,17 @@ export default function EspacioSelectPage() {
           ))}
         </div>
 
-        <div className="mt-6 text-center">
+        <div className="mt-6 flex flex-col items-center gap-3">
+          <button
+            onClick={() => navigate('/usuarios')}
+            className="text-sm text-gray-500 hover:text-brand-600 flex items-center gap-1.5"
+          >
+            <Users size={14} />
+            {user?.rol === 'superadmin' ? 'Administrar usuarios' : 'Usuarios de mi empresa'}
+          </button>
           <button
             onClick={() => { logout(); navigate('/login') }}
-            className="text-sm text-gray-500 hover:text-red-600 flex items-center gap-1.5 mx-auto"
+            className="text-sm text-gray-500 hover:text-red-600 flex items-center gap-1.5"
           >
             <LogOut size={14} />
             Cerrar sesión

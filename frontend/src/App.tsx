@@ -10,12 +10,19 @@ import PaquetesPage from './pages/PaquetesPage'
 import TrazabilidadPage from './pages/TrazabilidadPage'
 import CajaPage from './pages/CajaPage'
 import VentasPage from './pages/VentasPage'
+import UsuariosPage from './pages/UsuariosPage'
+import CambiarPasswordModal from './components/CambiarPasswordModal'
 import Layout from './components/Layout'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
   if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-500">Cargando...</div>
   if (!user) return <Navigate to="/login" replace />
+  // Con una contraseña puesta por un administrador no se entra a ningún lado
+  // hasta elegir una propia: el administrador no debe conservar una clave util.
+  if (user.debe_cambiar_password) {
+    return <CambiarPasswordModal forzado onClose={() => {}} />
+  }
   return <>{children}</>
 }
 
@@ -23,6 +30,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/usuarios" element={<PrivateRoute><UsuariosPage /></PrivateRoute>} />
       <Route path="/seleccionar-espacio" element={<PrivateRoute><EspacioSelectPage /></PrivateRoute>} />
       <Route path="/espacio/:espacioId" element={<PrivateRoute><Layout /></PrivateRoute>}>
         <Route index element={<DashboardPage />} />

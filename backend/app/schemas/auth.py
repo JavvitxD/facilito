@@ -23,6 +23,7 @@ class UserOut(BaseModel):
     email: str
     rol: str
     empresa_id: Optional[uuid.UUID] = None
+    debe_cambiar_password: bool = False
 
     class Config:
         from_attributes = True
