@@ -58,6 +58,7 @@ def build_insumo_out(insumo: Insumo) -> dict:
         "activo": insumo.activo,
         "alerta_stock": alerta_stock,
         "precio_minimo": precio_minimo,
+        "precio_venta": insumo.precio_venta,
         "precios": precios_out,
     }
 

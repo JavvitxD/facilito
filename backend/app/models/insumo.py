@@ -16,6 +16,8 @@ class Insumo(Base):
     invima = Column(String)
     stock_actual = Column(Numeric(12, 4), default=0)
     stock_minimo = Column(Numeric(12, 4), default=0)
+    # Precio al que se vende al cliente. Si esta vacio se sugiere a partir del costo.
+    precio_venta = Column(Numeric(14, 2))
     activo = Column(Boolean, default=True)
 
     espacio = relationship("Espacio", back_populates="insumos")

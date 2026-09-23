@@ -9,6 +9,7 @@ import ReportesPage from './pages/ReportesPage'
 import PaquetesPage from './pages/PaquetesPage'
 import TrazabilidadPage from './pages/TrazabilidadPage'
 import CajaPage from './pages/CajaPage'
+import VentasPage from './pages/VentasPage'
 import Layout from './components/Layout'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -29,6 +30,7 @@ function AppRoutes() {
         <Route path="servicios" element={<ServiciosPage />} />
         <Route path="reportes" element={<ReportesPage />} />
         <Route path="paquetes" element={<PaquetesPage />} />
+        <Route path="ventas" element={<VentasPage />} />
         <Route path="caja" element={<CajaPage />} />
         <Route path="trazabilidad" element={<TrazabilidadPage />} />
       </Route>

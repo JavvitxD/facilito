@@ -24,6 +24,7 @@ from .models.servicio_insumo import ServicioInsumo
 from .models.paquete import Paquete, PaqueteServicio
 from .models.audit_log import AuditLog
 from .models.caja import MovimientoCaja, Prestamo, AbonoPrestamo, ArqueoCaja
+from .models.venta import Venta, VentaItem
 from .auth import hash_password
 
 EMAIL_DEMO = "demo@facilito.co"
@@ -31,21 +32,31 @@ PASSWORD_DEMO = "demo2026"
 EMPRESA_DEMO = "Distribuidora Vital (Demo)"
 ESPACIO_DEMO = "Punto de venta (Demo)"
 
-# (nombre, presentacion, stock, stock_minimo, costo, proveedor)
-# costo None deja el producto sin precio, para que se vea esa alerta.
+# (nombre, presentacion, stock, stock_minimo, costo, precio_venta, proveedor)
+# costo None deja el producto sin precio de compra, para que se vea esa alerta.
 PRODUCTOS = [
-    ("VitalPro",          "Polvo 300 g",     4, 2, 147000, "Importadora Andina"),
-    ("V-NeuroKafe",       "Polvo 150 g",     6, 3, 105000, "Importadora Andina"),
-    ("VitalAge Collagen", "Polvo 300 g",     3, 2, 122500, "Naturales del Valle"),
-    ("V-Té Detox",        "Caja 20 sobres", 18, 6,  25600, "Naturales del Valle"),
-    ("V-Control",         "60 cápsulas",     5, 3,  70000, "Importadora Andina"),
-    ("V-Itadol",          "60 cápsulas",     1, 3,  70000, "Importadora Andina"),
-    ("V-Daily",           "Polvo 150 g",     4, 2, 175000, "Distribuidora Central"),
-    ("V-FortyFlora",      "60 cápsulas",     2, 3,  70000, "Naturales del Valle"),
-    ("Genius Shake",      "Polvo 400 g",     3, 2, 175000, "Distribuidora Central"),
-    ("V-Omega3",          "60 cápsulas",     7, 3,  84000, "Naturales del Valle"),
-    ("V-Curcumax",        "60 cápsulas",     0, 3,  91000, "Importadora Andina"),
-    ("V-Organex",         "60 cápsulas",     2, 2,   None, "Distribuidora Central"),
+    ("VitalPro",          "Polvo 300 g",     4, 2, 147000, 294000, "Importadora Andina"),
+    ("V-NeuroKafe",       "Polvo 150 g",     6, 3, 105000, 210000, "Importadora Andina"),
+    ("VitalAge Collagen", "Polvo 300 g",     3, 2, 122500, 245000, "Naturales del Valle"),
+    ("V-Té Detox",        "Caja 20 sobres", 18, 6,  25600,  57000, "Naturales del Valle"),
+    ("V-Control",         "60 cápsulas",     5, 3,  70000, 140000, "Importadora Andina"),
+    ("V-Itadol",          "60 cápsulas",     1, 3,  70000, 140000, "Importadora Andina"),
+    ("V-Daily",           "Polvo 150 g",     4, 2, 175000, 350000, "Distribuidora Central"),
+    ("V-FortyFlora",      "60 cápsulas",     2, 3,  70000, 140000, "Naturales del Valle"),
+    ("Genius Shake",      "Polvo 400 g",     3, 2, 175000, 350000, "Distribuidora Central"),
+    ("V-Omega3",          "60 cápsulas",     7, 3,  84000, 168000, "Naturales del Valle"),
+    ("V-Curcumax",        "60 cápsulas",     0, 3,  91000, 182000, "Importadora Andina"),
+    ("V-Organex",         "60 cápsulas",     2, 2,   None, 160000, "Distribuidora Central"),
+]
+
+# (dias atras, cliente, estado_pago, [(producto, cantidad, precio cobrado o None)])
+# Un precio distinto al de lista se conserva tal cual y la aplicacion lo senala.
+VENTAS = [
+    (26, "Laura Restrepo",  "pagado",    [("VitalPro", 1, None), ("V-Omega3", 1, None)]),
+    (19, "Andrés Mejía",    "pagado",    [("V-Té Detox", 4, None)]),
+    (12, "Carolina Ossa",   "pagado",    [("V-Daily", 1, 245000)]),
+    (38, "Julián Betancur", "pendiente", [("Genius Shake", 1, None)]),
+    (3,  "Sara Villa",      "pagado",    [("V-NeuroKafe", 2, None), ("V-Control", 1, None)]),
 ]
 
 PROVEEDORES = ("Importadora Andina", "Naturales del Valle", "Distribuidora Central")
@@ -57,19 +68,14 @@ COMBOS = [
 ]
 
 # (dias atras, tipo, categoria, concepto, monto)
+# Los ingresos por venta no van aqui: los genera cada venta al registrarse.
 MOVIMIENTOS = [
-    (45, "ingreso", "otro",   "Capital inicial del negocio",           3000000),
-    (40, "egreso",  "compra", "Compra de inventario inicial",          2100000),
-    (32, "ingreso", "venta",  "Venta Combo Energía — Laura Restrepo",   560000),
-    (28, "egreso",  "gasto",  "Arriendo del local",                     800000),
-    (25, "ingreso", "venta",  "Venta VitalPro x2 — Andrés Mejía",       588000),
-    (21, "ingreso", "venta",  "Venta V-Té Detox x10 — feria de salud",  512000),
-    (18, "egreso",  "gasto",  "Transporte y domicilios",                 95000),
-    (14, "ingreso", "venta",  "Venta Combo Detox — Carolina Ossa",      342000),
-    (11, "egreso",  "compra", "Reposición de V-Omega3",                 588000),
-    (7,  "ingreso", "venta",  "Venta V-Daily — Julián Betancur",        350000),
-    (4,  "egreso",  "gasto",  "Servicios públicos",                     140000),
-    (2,  "ingreso", "venta",  "Venta Combo Bienestar — Sara Villa",     627000),
+    (45, "ingreso", "otro",   "Capital inicial del negocio",  3000000),
+    (40, "egreso",  "compra", "Compra de inventario inicial", 2100000),
+    (28, "egreso",  "gasto",  "Arriendo del local",            800000),
+    (18, "egreso",  "gasto",  "Transporte y domicilios",        95000),
+    (11, "egreso",  "compra", "Reposición de V-Omega3",        588000),
+    (4,  "egreso",  "gasto",  "Servicios públicos",            140000),
 ]
 
 DIFERENCIA_ARQUEO = Decimal(-35000)
@@ -90,6 +96,11 @@ def borrar_datos(db: Session, empresa_id: uuid.UUID) -> None:
     espacios = [e.id for e in db.query(Espacio).filter(Espacio.empresa_id == empresa_id).all()]
     if not espacios:
         return
+
+    ventas = [v.id for v in db.query(Venta).filter(Venta.espacio_id.in_(espacios)).all()]
+    if ventas:
+        db.query(VentaItem).filter(VentaItem.venta_id.in_(ventas)).delete(synchronize_session=False)
+        db.query(Venta).filter(Venta.id.in_(ventas)).delete(synchronize_session=False)
 
     paquetes = [p.id for p in db.query(Paquete).filter(Paquete.espacio_id.in_(espacios)).all()]
     if paquetes:
@@ -144,7 +155,7 @@ def sembrar(db: Session, empresa: Empresa) -> Espacio:
     db.flush()
 
     insumos = {}
-    for nombre, presentacion, stock, minimo, costo, proveedor in PRODUCTOS:
+    for nombre, presentacion, stock, minimo, costo, venta, proveedor in PRODUCTOS:
         ins = Insumo(
             id=uuid.uuid4(),
             espacio_id=espacio.id,
@@ -153,6 +164,7 @@ def sembrar(db: Session, empresa: Empresa) -> Espacio:
             unidad_medida="unidad",
             stock_actual=Decimal(stock),
             stock_minimo=Decimal(minimo),
+            precio_venta=Decimal(venta),
             activo=True,
         )
         db.add(ins)
@@ -201,6 +213,57 @@ def sembrar(db: Session, empresa: Empresa) -> Espacio:
             usuario_email=EMAIL_DEMO,
         ))
 
+    # Ventas: cada una descuenta stock al registrarse en la aplicacion, pero aqui
+    # el stock ya viene con el valor final, asi que solo se deja el historico.
+    for dias, cliente, estado, lineas in VENTAS:
+        fecha = hace(dias)
+        venta = Venta(
+            id=uuid.uuid4(),
+            espacio_id=espacio.id,
+            fecha=fecha,
+            cliente=cliente,
+            estado_pago=estado,
+            fecha_pago=fecha if estado == "pagado" else None,
+            usuario_email=EMAIL_DEMO,
+            total=Decimal(0),
+            costo_total=Decimal(0),
+        )
+        db.add(venta)
+        db.flush()
+
+        total = Decimal(0)
+        costo_total = Decimal(0)
+        for producto, cantidad, cobrado in lineas:
+            datos = next(x for x in PRODUCTOS if x[0] == producto)
+            costo = Decimal(datos[4] or 0)
+            sugerido = Decimal(datos[5])
+            precio = Decimal(cobrado) if cobrado is not None else sugerido
+            db.add(VentaItem(
+                id=uuid.uuid4(),
+                venta_id=venta.id,
+                insumo_id=insumos[producto].id,
+                descripcion=producto,
+                cantidad=Decimal(cantidad),
+                precio_unitario=precio,
+                precio_sugerido=sugerido,
+                costo_unitario=costo,
+                subtotal=precio * cantidad,
+            ))
+            total += precio * cantidad
+            costo_total += costo * cantidad
+
+        venta.total = total
+        venta.costo_total = costo_total
+
+        if estado == "pagado":
+            db.add(MovimientoCaja(
+                id=uuid.uuid4(), espacio_id=espacio.id, fecha=fecha,
+                tipo="ingreso", categoria="venta",
+                concepto=f"Venta a {cliente}", monto=total,
+                referencia_tipo="venta", referencia_id=venta.id,
+                usuario_email=EMAIL_DEMO,
+            ))
+
     # Prestamo vencido: sin abonos desde hace 52 dias, dispara la alerta.
     vencido = Prestamo(
         id=uuid.uuid4(), espacio_id=espacio.id, fecha=hace(52),
@@ -245,8 +308,13 @@ def sembrar(db: Session, empresa: Empresa) -> Espacio:
         ))
 
     # Arqueo con una diferencia deliberada, para mostrar la alerta de descuadre.
-    ingresos = sum(Decimal(m[4]) for m in MOVIMIENTOS if m[1] == "ingreso") + Decimal(400000)
-    egresos = sum(Decimal(m[4]) for m in MOVIMIENTOS if m[1] == "egreso") + Decimal(1000000)
+    # El saldo se toma de los movimientos ya insertados, no de las constantes.
+    db.flush()
+    movimientos = db.query(MovimientoCaja).filter(
+        MovimientoCaja.espacio_id == espacio.id, MovimientoCaja.anulado == False
+    ).all()
+    ingresos = sum((Decimal(str(m.monto)) for m in movimientos if m.tipo == "ingreso"), Decimal(0))
+    egresos = sum((Decimal(str(m.monto)) for m in movimientos if m.tipo == "egreso"), Decimal(0))
     saldo_teorico = ingresos - egresos
     db.add(ArqueoCaja(
         id=uuid.uuid4(),

@@ -37,6 +37,7 @@ class InsumoCreate(BaseModel):
     invima: Optional[str] = None
     stock_actual: Optional[Decimal] = Decimal("0")
     stock_minimo: Optional[Decimal] = Decimal("0")
+    precio_venta: Optional[Decimal] = None
     precios: Optional[List[PrecioInsumoCreate]] = []
 
 
@@ -47,6 +48,7 @@ class InsumoUpdate(BaseModel):
     invima: Optional[str] = None
     stock_actual: Optional[Decimal] = None
     stock_minimo: Optional[Decimal] = None
+    precio_venta: Optional[Decimal] = None
     activo: Optional[bool] = None
 
 
@@ -62,6 +64,7 @@ class InsumoOut(BaseModel):
     activo: bool
     alerta_stock: bool = False
     precio_minimo: Optional[float] = None
+    precio_venta: Optional[Decimal] = None
     precios: List[PrecioInsumoOut] = []
 
     class Config:
