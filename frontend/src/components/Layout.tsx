@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { LayoutDashboard, Package, Stethoscope, BarChart3, LogOut, ChevronLeft, Menu, X, Layers, History } from 'lucide-react'
+import { LayoutDashboard, Package, Stethoscope, BarChart3, LogOut, ChevronLeft, Menu, X, Layers, History, Wallet } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 export default function Layout() {
@@ -23,6 +23,7 @@ export default function Layout() {
     { to: `${base}/inventario`, label: 'Inventario', icon: Package },
     { to: `${base}/servicios`, label: 'Servicios', icon: Stethoscope },
     { to: `${base}/paquetes`, label: 'Paquetes', icon: Layers },
+    { to: `${base}/caja`, label: 'Caja', icon: Wallet },
     { to: `${base}/reportes`, label: 'Reportes', icon: BarChart3 },
     { to: `${base}/trazabilidad`, label: 'Trazabilidad', icon: History },
   ]

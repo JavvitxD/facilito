@@ -8,3 +8,4 @@ from .servicio import Servicio
 from .servicio_insumo import ServicioInsumo
 from .paquete import Paquete, PaqueteServicio
 from .audit_log import AuditLog
+from .caja import MovimientoCaja, Prestamo, AbonoPrestamo, ArqueoCaja

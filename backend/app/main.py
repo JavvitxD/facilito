@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from .config import settings
-from .api.routes import auth, empresas, insumos, servicios, paquetes, auditoria
+from .api.routes import auth, empresas, insumos, servicios, paquetes, auditoria, caja
 
 app = FastAPI(title="INV DOC — Guiar Salud IPS", version="1.0.0")
 
@@ -22,6 +22,7 @@ app.include_router(insumos.router)
 app.include_router(servicios.router)
 app.include_router(paquetes.router)
 app.include_router(auditoria.router)
+app.include_router(caja.router)
 
 
 @app.get("/health")
