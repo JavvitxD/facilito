@@ -119,7 +119,8 @@ def update_insumo(insumo_id: uuid.UUID, data: InsumoUpdate, current_user: Usuari
         raise HTTPException(status_code=404, detail="Insumo no encontrado")
     check_espacio_access(insumo.espacio_id, current_user, db)
 
-    cambios = data.model_dump(exclude_none=True)
+    # exclude_unset, no exclude_none: un null explicito debe poder borrar el valor.
+    cambios = data.model_dump(exclude_unset=True)
     descripciones = []
     if "stock_actual" in cambios:
         descripciones.append(f"Stock: {float(insumo.stock_actual or 0):.0f} → {float(cambios['stock_actual']):.0f} {insumo.unidad_medida or ''}")
@@ -205,7 +206,8 @@ def update_precio(precio_id: uuid.UUID, data: PrecioInsumoUpdate, current_user: 
         raise HTTPException(status_code=404, detail="Precio no encontrado")
     check_espacio_access(precio.insumo.espacio_id, current_user, db)
 
-    cambios = data.model_dump(exclude_none=True)
+    # exclude_unset, no exclude_none: un null explicito debe poder borrar el valor.
+    cambios = data.model_dump(exclude_unset=True)
     descripciones = []
     if "precio_presentacion" in cambios:
         descripciones.append(f"${float(precio.precio_presentacion):,.0f} → ${float(cambios['precio_presentacion']):,.0f}")

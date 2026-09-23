@@ -62,6 +62,7 @@ function InsumoRow({ ins, espacioId, proveedores }: { ins: any; espacioId: strin
     unidad_medida: ins.unidad_medida ?? '',
     invima: ins.invima ?? '',
     stock_minimo: String(ins.stock_minimo ?? 0),
+    precio_venta: ins.precio_venta != null ? String(ins.precio_venta) : '',
   })
   const qc = useQueryClient()
 
@@ -147,6 +148,27 @@ function InsumoRow({ ins, espacioId, proveedores }: { ins: any; espacioId: strin
                     <label className="block text-xs text-gray-500 mb-0.5">INVIMA</label>
                     <input className="input text-sm py-1.5" value={infoForm.invima} onChange={(e) => setInfoForm({ ...infoForm, invima: e.target.value })} />
                   </div>
+                  <div className="col-span-2">
+                    <label className="block text-xs text-gray-500 mb-0.5">Precio de venta al cliente</label>
+                    <input
+                      className="input text-sm py-1.5"
+                      type="number"
+                      placeholder={ins.precio_minimo != null ? `Sugerido ${Math.round(ins.precio_minimo * 1.4)}` : 'Opcional'}
+                      value={infoForm.precio_venta}
+                      onChange={(e) => setInfoForm({ ...infoForm, precio_venta: e.target.value })}
+                    />
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {infoForm.precio_venta && ins.precio_minimo
+                        ? (() => {
+                            const venta = parseFloat(infoForm.precio_venta)
+                            const margen = ((venta / ins.precio_minimo - 1) * 100)
+                            return venta < ins.precio_minimo
+                              ? `Está por debajo del costo (${cop(ins.precio_minimo)})`
+                              : `Margen de ${margen.toFixed(0)}% sobre el costo de ${cop(ins.precio_minimo)}`
+                          })()
+                        : 'Si lo dejas vacío, al vender se sugiere el costo más 40%.'}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -157,6 +179,7 @@ function InsumoRow({ ins, espacioId, proveedores }: { ins: any; espacioId: strin
                       unidad_medida: infoForm.unidad_medida || null,
                       invima: infoForm.invima || null,
                       stock_minimo: parseFloat(infoForm.stock_minimo) || 0,
+                      precio_venta: infoForm.precio_venta === '' ? null : parseFloat(infoForm.precio_venta),
                     })}
                     disabled={updateMut.isPending}
                   >

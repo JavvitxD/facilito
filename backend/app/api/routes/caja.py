@@ -313,7 +313,7 @@ def actualizar_prestamo(
         raise HTTPException(status_code=404, detail="Prestamo no encontrado")
     check_espacio_access(prestamo.espacio_id, current_user, db)
 
-    campos = data.model_dump(exclude_none=True)
+    campos = data.model_dump(exclude_unset=True)
     for campo, valor in campos.items():
         setattr(prestamo, campo, valor)
 

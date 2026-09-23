@@ -33,13 +33,32 @@ COLUMNAS = [
     ("presentacion", "Presentación", 20),
     ("stock_actual", "Stock actual", 13),
     ("stock_minimo", "Stock mínimo", 13),
-    ("costo", "Costo (COP)", 15),
+    ("costo", "Costo unitario (COP)", 19),
     ("precio_venta", "Precio venta (COP)", 17),
     ("proveedor", "Proveedor", 24),
 ]
 
 # Variacion de costo a partir de la cual se pide confirmar que no es un error.
 SALTO_COSTO = Decimal("0.5")
+
+# Titulos alternativos aceptados al leer, para no romper archivos ya descargados.
+ALIAS = {
+    "costo": {"costo unitario (cop)", "costo (cop)", "costo unitario", "costo"},
+    "precio_venta": {"precio venta (cop)", "precio de venta (cop)", "precio venta", "precio cliente"},
+    "nombre": {"producto", "nombre", "insumo"},
+}
+
+
+def _texto_presentacion(insumo, mejor) -> str:
+    """Describe la presentacion aclarando cuantas unidades trae."""
+    if mejor is None:
+        return insumo.unidad_medida or ""
+    base = mejor.descripcion_presentacion or insumo.unidad_medida or ""
+    unidades = mejor.unidades_por_presentacion or 1
+    if unidades > 1:
+        detalle = f"{unidades} unidades"
+        return f"{base} ({detalle})" if base else detalle
+    return base
 
 
 # ---------------------------------------------------------------- exportar
@@ -73,10 +92,10 @@ def exportar_inventario(db: Session, espacio_id, nombre_espacio: str) -> bytes:
         ws.append([
             insumo.nombre,
             insumo.categoria or "",
-            mejor.descripcion_presentacion if mejor else (insumo.unidad_medida or ""),
+            _texto_presentacion(insumo, mejor),
             float(insumo.stock_actual or 0),
             float(insumo.stock_minimo or 0),
-            float(mejor.precio_presentacion) if mejor else None,
+            round(float(mejor.precio_unitario), 2) if mejor else None,
             float(insumo.precio_venta) if insumo.precio_venta is not None else None,
             mejor.proveedor.nombre if mejor and mejor.proveedor else "",
         ])
@@ -95,6 +114,9 @@ def exportar_inventario(db: Session, espacio_id, nombre_espacio: str) -> bytes:
         [],
         ["Antes de guardar nada, la aplicación te muestra qué va a cambiar."],
         ["Los productos que borres del archivo NO se borran de la aplicación."],
+        [],
+        ["El costo es por UNIDAD, no por caja. Si una caja de 100 guantes"],
+        ["", "cuesta 45.200, el costo unitario es 452."],
         [],
         ["Los precios se escriben en pesos, sin puntos ni símbolo: 147000"],
         [f"Exportado desde: {nombre_espacio}"],
@@ -160,7 +182,8 @@ def leer_filas(contenido: bytes) -> list[dict]:
             continue
         texto = str(celda.value).strip().lower()
         for clave, titulo, _ in COLUMNAS:
-            if texto == titulo.strip().lower():
+            aceptados = ALIAS.get(clave, {titulo.strip().lower()})
+            if texto == titulo.strip().lower() or texto in aceptados:
                 titulos[clave] = indice
                 break
 

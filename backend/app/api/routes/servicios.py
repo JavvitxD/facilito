@@ -101,7 +101,8 @@ def update_servicio(servicio_id: uuid.UUID, data: ServicioUpdate, current_user: 
     check_espacio_access(servicio.espacio_id, current_user, db)
 
     insumos_data = data.insumos
-    update_fields = data.model_dump(exclude={"insumos"}, exclude_none=True)
+    # exclude_unset, no exclude_none: un null explicito debe poder borrar el valor.
+    update_fields = data.model_dump(exclude={"insumos"}, exclude_unset=True)
     for field, value in update_fields.items():
         setattr(servicio, field, value)
 
