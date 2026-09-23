@@ -362,6 +362,10 @@ def restaurar(db: Session) -> Espacio:
     empresa = obtener_empresa_demo(db)
     if empresa is None:
         raise ValueError("El ambiente de demostración no existe")
+    # Se reafirma aqui porque una demo creada antes de que existiera el tipo de
+    # negocio quedaria marcada como 'salud' y mostraria el vocabulario equivocado.
+    empresa.nombre = EMPRESA_DEMO
+    empresa.tipo_negocio = "comercio"
     borrar_datos(db, empresa.id)
     espacio = sembrar(db, empresa)
     db.commit()
