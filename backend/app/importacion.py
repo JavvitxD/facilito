@@ -41,6 +41,11 @@ COLUMNAS = [
 # Variacion de costo a partir de la cual se pide confirmar que no es un error.
 SALTO_COSTO = Decimal("0.5")
 
+# Diferencia de costo que se considera redondeo y no un cambio real. La
+# exportacion redondea a dos decimales, asi que un costo como 233,333 vuelve
+# como 233,33 y no debe contarse como edicion.
+TOLERANCIA_COSTO = Decimal("0.01")
+
 # Titulos alternativos aceptados al leer, para no romper archivos ya descargados.
 ALIAS = {
     "costo": {"costo unitario (cop)", "costo (cop)", "costo unitario", "costo"},
@@ -219,6 +224,13 @@ def leer_filas(contenido: bytes) -> list[dict]:
 
 # ---------------------------------------------------------------- analisis
 
+def _cambio_real(nuevo: Decimal, previo: Decimal | None) -> bool:
+    """True si el costo cambio de verdad y no solo por el redondeo al exportar."""
+    if previo is None:
+        return True
+    return abs(nuevo - previo) > TOLERANCIA_COSTO
+
+
 def _costo_actual(insumo: Insumo) -> Decimal | None:
     activos = [p for p in insumo.precios if p.activo]
     if not activos:
@@ -292,7 +304,7 @@ def analizar(db: Session, espacio_id, contenido: bytes) -> dict:
                 cambios.append(f"mínimo {minimo_previo:g} → {fila['stock_minimo']:g}")
 
             costo_previo = _costo_actual(insumo)
-            if fila["costo"] is not None and (costo_previo is None or fila["costo"] != costo_previo):
+            if fila["costo"] is not None and _cambio_real(fila["costo"], costo_previo):
                 if costo_previo is None:
                     cambios.append(f"costo nuevo ${fila['costo']:,.0f}")
                 else:
@@ -411,7 +423,7 @@ def aplicar(db: Session, espacio_id, contenido: bytes, usuario_email: str) -> di
         # que el historico de precios conserve lo que costaba antes.
         if fila["costo"] is not None:
             costo_previo = _costo_actual(insumo)
-            if costo_previo is None or fila["costo"] != costo_previo:
+            if _cambio_real(fila["costo"], costo_previo):
                 nombre_proveedor = fila["proveedor"] or "Importado desde Excel"
                 proveedor = proveedores.get(nombre_proveedor.strip().lower())
                 if proveedor is None:
