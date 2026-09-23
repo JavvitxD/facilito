@@ -4,6 +4,7 @@ import { LayoutDashboard, Package, Stethoscope, BarChart3, LogOut, ChevronLeft, 
 import { useState, useEffect } from 'react'
 import CambiarPasswordModal from './CambiarPasswordModal'
 import BotonRestaurarDemo from './BotonRestaurarDemo'
+import { useTerminos } from '../terminologia'
 
 export default function Layout() {
   const { user, logout } = useAuth()
@@ -12,6 +13,7 @@ export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [espacioNombre, setEspacioNombre] = useState('')
   const [cambiandoPassword, setCambiandoPassword] = useState(false)
+  const t = useTerminos()
 
   useEffect(() => {
     const stored = localStorage.getItem('espacio')
@@ -23,9 +25,9 @@ export default function Layout() {
   const base = `/espacio/${espacioId}`
   const nav = [
     { to: base, label: 'Dashboard', icon: LayoutDashboard, end: true },
-    { to: `${base}/inventario`, label: 'Inventario', icon: Package },
-    { to: `${base}/servicios`, label: 'Servicios', icon: Stethoscope },
-    { to: `${base}/paquetes`, label: 'Paquetes', icon: Layers },
+    { to: `${base}/inventario`, label: t.insumos, icon: Package },
+    { to: `${base}/servicios`, label: t.servicios, icon: Stethoscope },
+    { to: `${base}/paquetes`, label: t.paquetes, icon: Layers },
     { to: `${base}/ventas`, label: 'Ventas', icon: ShoppingCart },
     { to: `${base}/caja`, label: 'Caja', icon: Wallet },
     { to: `${base}/reportes`, label: 'Reportes', icon: BarChart3 },

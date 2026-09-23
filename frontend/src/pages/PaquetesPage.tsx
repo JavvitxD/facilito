@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
+import { useTerminos } from '../terminologia'
 import { Plus, X, Trash2, ChevronDown, ChevronUp, Package, Pencil } from 'lucide-react'
 
 function cop(n: number) {
@@ -221,6 +222,7 @@ function PaqueteCard({ pak, espacioId, servicios }: { pak: any; espacioId: strin
 
 export default function PaquetesPage() {
   const { espacioId } = useParams()
+  const t = useTerminos()
   const [showModal, setShowModal] = useState(false)
 
   const { data: paquetes = [], isLoading } = useQuery({

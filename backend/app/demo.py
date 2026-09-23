@@ -340,6 +340,7 @@ def crear_si_no_existe(db: Session) -> bool:
         nombre=EMPRESA_DEMO,
         nit="900.000.000-0",
         ciudad="Medellín",
+        tipo_negocio="comercio",
         activa=True,
     )
     db.add(empresa)

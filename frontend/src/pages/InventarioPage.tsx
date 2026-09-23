@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
 import ImportarExcelModal from '../components/ImportarExcelModal'
+import { useTerminos } from '../terminologia'
 import { Plus, Search, AlertTriangle, ChevronDown, ChevronUp, Pencil, Trash2, X, Check, Settings, Upload, Download } from 'lucide-react'
 
 function cop(n: number) {
@@ -529,6 +530,7 @@ function NuevoInsumoModal({ espacioId, proveedores, onClose }: { espacioId: stri
 
 export default function InventarioPage() {
   const { espacioId } = useParams()
+  const t = useTerminos()
   const [search, setSearch] = useState('')
   const [catFilter, setCatFilter] = useState('')
   const [showModal, setShowModal] = useState(false)
@@ -601,7 +603,7 @@ export default function InventarioPage() {
           </button>
           <button className="btn-primary flex items-center gap-2" onClick={() => setShowModal(true)}>
             <Plus size={16} />
-            <span className="hidden sm:inline">Nuevo insumo</span>
+            <span className="hidden sm:inline">{t.nuevoInsumo}</span>
           </button>
         </div>
       </div>

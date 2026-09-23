@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
+import { useTerminos } from '../terminologia'
 import { Plus, X, Trash2, ChevronDown, ChevronUp, Pencil, Check, AlertCircle } from 'lucide-react'
 
 function cop(n: number) {
@@ -490,6 +491,7 @@ function NuevoServicioModal({ espacioId, insumos, onClose }: { espacioId: string
 
 export default function ServiciosPage() {
   const { espacioId } = useParams()
+  const t = useTerminos()
   const [showModal, setShowModal] = useState(false)
 
   const { data: servicios = [], isLoading } = useQuery({
@@ -506,12 +508,12 @@ export default function ServiciosPage() {
     <div className="max-w-4xl mx-auto space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Servicios</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{servicios.length} procedimientos</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t.servicios}</h1>
+          <p className="text-sm text-gray-500 mt-0.5">{servicios.length} {t.descripcionServicios}</p>
         </div>
         <button className="btn-primary flex items-center gap-2" onClick={() => setShowModal(true)}>
           <Plus size={16} />
-          <span className="hidden sm:inline">Nuevo servicio</span>
+          <span className="hidden sm:inline">{t.nuevoServicio}</span>
         </button>
       </div>
 
@@ -523,7 +525,7 @@ export default function ServiciosPage() {
         ))}
         {!isLoading && servicios.length === 0 && (
           <div className="card text-center py-10 text-gray-400">
-            No hay servicios registrados. Crea el primero.
+            {`No hay ${t.descripcionServicios} registrados. Crea el primero.`}
           </div>
         )}
       </div>
